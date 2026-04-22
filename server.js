@@ -9,6 +9,7 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.get("/health", (req, res) => res.send("OK"));
 
 const QUESTIONS = [
   {
@@ -113,7 +114,7 @@ const QUESTIONS = [
   }
 ];
 
-const QUESTION_TIME = 15; // seconds
+const QUESTION_TIME = 25; // seconds
 
 const rooms = {};
 
@@ -210,10 +211,12 @@ io.on('connection', (socket) => {
     room.answersThisRound++;
 
     // Send feedback to THIS player
+    const q = QUESTIONS[room.currentQ];
     socket.emit('answer_result', {
       correct,
       points,
-      correctIndex: QUESTIONS[room.currentQ].correct,
+      correctIndex: q.correct,
+      correctAnswer: q.options[q.correct],
       totalScore: player.score
     });
 
